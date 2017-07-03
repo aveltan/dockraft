@@ -80,7 +80,7 @@ def set_pvp(arg_value):
             print('[ERROR] Invalid value for pvp')
 
 def set_whitelist(arg_value):
-    """ Configure the value of the attribute "whitelist" in the file server.properties. """
+    """ Configure the value of the attribute "white-list" in the file server.properties. """
     if arg_value:
         if (arg_value == 'true') or (arg_value == 'false'):
             search_and_replace(
@@ -90,6 +90,37 @@ def set_whitelist(arg_value):
             )
         else:
             print('[ERROR] Invalid value for whitelist')
+
+def set_server_port(arg_value):
+    """ Configure the value of the attribute "server-port" in the file server.properties. """
+    ## TODO specify an available range of ports
+    if arg_value:
+        is_int = False
+        try:
+            int(arg_value)
+            is_int = True
+        except ValueError:
+            print('[ERROR] The server must be an integer')
+        if is_int:
+            search_and_replace(
+                __server_properties_file__,
+                r'server-port=.*$',
+                'server-port='+arg_value
+            )
+        else:
+            print('[ERROR] Invalid value for server port')
+
+def set_online_mode(arg_value):
+    """ Configure the value of the attribute "online-mode" in the file server.properties. """
+    if arg_value:
+        if (arg_value == 'true') or (arg_value == 'false'):
+            search_and_replace(
+                __server_properties_file__,
+                r'online-mode=.*$',
+                'online-mode='+arg_value
+            )
+        else:
+            print('[ERROR] Invalid value for online mode')
 
 # #######################################################################
 # ############################### eula.txt ##############################
@@ -141,6 +172,16 @@ __parser__.add_argument(
     default='false',
     help='set the whitelist option of the server'
 )
+__parser__.add_argument(
+    '-p', '--port',
+    default='25565',
+    help='set the server-port of the server'
+)
+__parser__.add_argument(
+    '--onlinemode',
+    default='false',
+    help='set the online-mode option of the server'
+)
 
 __parser__.add_argument(
     '--eula',
@@ -157,6 +198,8 @@ set_difficulty(__args__.difficulty)
 set_gamemode(__args__.gamemode)
 set_pvp(__args__.pvp)
 set_whitelist(__args__.whitelist)
+set_server_port(__args__.port)
+set_online_mode(__args__.onlinemode)
 
 set_eula(__args__.eula)
 
