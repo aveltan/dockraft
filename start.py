@@ -44,6 +44,25 @@ def set_difficulty(arg_value):
             'difficulty='+difficulty_int
         )
 
+def set_gamemode(arg_value):
+    """ Configure the value of the attribute "gamemode" in the file server.properties. """
+    if arg_value:
+        if arg_value == 'survival':
+            difficulty_int = '0'
+        elif arg_value == 'creative':
+            difficulty_int = '1'
+        elif arg_value == 'adventure':
+            difficulty_int = '2'
+        elif arg_value == 'spectator':
+            difficulty_int = '3'
+        else:
+            print('Invalid value for difficulty')
+        search_and_replace(
+            __server_properties_file__,
+            r'gamemode=.*$',
+            'gamemode='+difficulty_int
+        )
+
 # #######################################################################
 # ############################### eula.txt ##############################
 # #######################################################################
@@ -78,6 +97,12 @@ __parser__.add_argument(
 )
 
 __parser__.add_argument(
+    '-g', '--gamemode',
+    default='survival',
+    help='set the gamemode of the server'
+)
+
+__parser__.add_argument(
     '--eula',
     action='store',
     default='false',
@@ -89,6 +114,7 @@ __parser__.add_argument(
 __args__ = __parser__.parse_args()
 
 set_difficulty(__args__.difficulty)
+set_gamemode(__args__.gamemode)
 
 set_eula(__args__.eula)
 
