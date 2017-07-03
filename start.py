@@ -28,6 +28,7 @@ def search_and_replace(file_path, regex, new_line):
 def set_difficulty(arg_value):
     """ Configure the value of the attribute "difficulty" in the file server.properties. """
     if arg_value:
+        valid_arg = True
         if arg_value == 'peaceful':
             difficulty_int = '0'
         elif arg_value == 'easy':
@@ -38,15 +39,18 @@ def set_difficulty(arg_value):
             difficulty_int = '3'
         else:
             print('Invalid value for difficulty')
-        search_and_replace(
-            __server_properties_file__,
-            r'difficulty=.*$',
-            'difficulty='+difficulty_int
-        )
+            valid_arg = False
+        if valid_arg:
+            search_and_replace(
+                __server_properties_file__,
+                r'difficulty=.*$',
+                'difficulty='+difficulty_int
+            )
 
 def set_gamemode(arg_value):
     """ Configure the value of the attribute "gamemode" in the file server.properties. """
     if arg_value:
+        valid_arg = True
         if arg_value == 'survival':
             difficulty_int = '0'
         elif arg_value == 'creative':
@@ -56,12 +60,26 @@ def set_gamemode(arg_value):
         elif arg_value == 'spectator':
             difficulty_int = '3'
         else:
-            print('Invalid value for difficulty')
-        search_and_replace(
-            __server_properties_file__,
-            r'gamemode=.*$',
-            'gamemode='+difficulty_int
-        )
+            print('Invalid value for gamemode')
+            valid_arg = False
+        if valid_arg:
+            search_and_replace(
+                __server_properties_file__,
+                r'gamemode=.*$',
+                'gamemode='+difficulty_int
+            )
+
+def set_pvp(arg_value):
+    """ Configure the value of the attribute "pvp" in the file server.properties. """
+    if arg_value:
+        if (arg_value == 'true') or (arg_value == 'false'):
+            search_and_replace(
+                __server_properties_file__,
+                r'pvp=.*$',
+                'pvp='+arg_value
+            )
+        else:
+            print('Invalid value for pvp')
 
 # #######################################################################
 # ############################### eula.txt ##############################
@@ -103,6 +121,12 @@ __parser__.add_argument(
 )
 
 __parser__.add_argument(
+    '--pvp',
+    default='true',
+    help='set the pvp option of the server'
+)
+
+__parser__.add_argument(
     '--eula',
     action='store',
     default='false',
@@ -115,6 +139,7 @@ __args__ = __parser__.parse_args()
 
 set_difficulty(__args__.difficulty)
 set_gamemode(__args__.gamemode)
+set_pvp(__args__.pvp)
 
 set_eula(__args__.eula)
 
