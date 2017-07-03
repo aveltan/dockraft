@@ -7,17 +7,34 @@ import os
 import argparse
 import fileinput
 import re
+import json
 
 ## path to this script
 __workdir__ = os.path.dirname(os.path.realpath(__file__))
 __eula_file__ = __workdir__ + '/minecraft-server/eula.txt'
 __server_properties_file__ = __workdir__ + '/minecraft-server/server.properties'
+__ops_file__ = __workdir__ + '/minecraft-server/ops.json'
+__whitelist_file__ = __workdir__ + '/minecraft-server/whitelist.json'
 
 def search_and_replace(file_path, regex, new_line):
     """ Search for a pattern in the file, and replace with a new line """
     with fileinput.FileInput(file_path, inplace=True) as file:
         for line in file:
             print(re.sub(regex, new_line, line), end='')
+
+def add_player(arg_file, arg_player):
+    """
+    Append a player to an array of a json file,
+    the player is composed of the uuid and the name separated by a :
+    """
+    file = open(arg_file, 'r+')
+    player_list = json.load(file)
+    split = re.split(':', arg_player)
+    player = json.loads('{ "uuid" : "'+split[0]+'", "name" : "'+split[1]+'"}')
+    player_list.append(player)
+    file.seek(0) ## put the pointer at the beginning to overwrite
+    file.write(json.dumps(player_list))
+    file.close()    
 
 # #######################################################################
 # ######################### server.properties ###########################
@@ -123,6 +140,26 @@ def set_online_mode(arg_value):
             print('[ERROR] Invalid value for online mode')
 
 # #######################################################################
+# ############################### ops.json ##############################
+# #######################################################################
+
+def add_player_ops(arg_value):
+    """ Add a player to the whitelist, the uuid and the name are to be specified """
+    ## TODO check arg_value is valid
+    if arg_value:
+        add_player(__ops_file__, arg_value)
+
+# #######################################################################
+# ########################### whitelist.json ############################
+# #######################################################################
+
+def add_player_whitelist(arg_value):
+    """ Add a player to the whitelist, the uuid and the name are to be specified """
+    ## TODO check arg_value is valid
+    if arg_value:
+        add_player(__whitelist_file__, arg_value)
+
+# #######################################################################
 # ############################### eula.txt ##############################
 # #######################################################################
 
@@ -173,7 +210,7 @@ __parser__.add_argument(
     help='set the whitelist option of the server'
 )
 __parser__.add_argument(
-    '-p', '--port',
+    '--port',
     default='25565',
     help='set the server-port of the server'
 )
@@ -181,6 +218,15 @@ __parser__.add_argument(
     '--onlinemode',
     default='false',
     help='set the online-mode option of the server'
+)
+
+__parser__.add_argument(
+    '-o', '--ops',
+    help='add a player to the ops.json file'
+)
+__parser__.add_argument(
+    '-w', '-p', '--player',
+    help='add a player to the whitelist.json file'
 )
 
 __parser__.add_argument(
@@ -200,6 +246,8 @@ set_pvp(__args__.pvp)
 set_whitelist(__args__.whitelist)
 set_server_port(__args__.port)
 set_online_mode(__args__.onlinemode)
+add_player_ops(__args__.ops)
+add_player_whitelist(__args__.player)
 
 set_eula(__args__.eula)
 
