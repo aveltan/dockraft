@@ -17,8 +17,6 @@ def search_and_replace(file_path, regex, new_line):
     """ Search for a pattern in the file, and replace with a new line """
     with fileinput.FileInput(file_path, inplace=True) as file:
         for line in file:
-            # line = re.sub(regex, new_line, line)
-            # print(line.replace(regex, new_line), end='')
             print(re.sub(regex, new_line, line), end='')
 
 # #######################################################################
@@ -38,7 +36,7 @@ def set_difficulty(arg_value):
         elif arg_value == 'hard':
             difficulty_int = '3'
         else:
-            print('Invalid value for difficulty')
+            print('[ERROR] Invalid value for difficulty')
             valid_arg = False
         if valid_arg:
             search_and_replace(
@@ -52,21 +50,21 @@ def set_gamemode(arg_value):
     if arg_value:
         valid_arg = True
         if arg_value == 'survival':
-            difficulty_int = '0'
+            gamemode_int = '0'
         elif arg_value == 'creative':
-            difficulty_int = '1'
+            gamemode_int = '1'
         elif arg_value == 'adventure':
-            difficulty_int = '2'
+            gamemode_int = '2'
         elif arg_value == 'spectator':
-            difficulty_int = '3'
+            gamemode_int = '3'
         else:
-            print('Invalid value for gamemode')
+            print('[ERROR] Invalid value for gamemode')
             valid_arg = False
         if valid_arg:
             search_and_replace(
                 __server_properties_file__,
                 r'gamemode=.*$',
-                'gamemode='+difficulty_int
+                'gamemode='+gamemode_int
             )
 
 def set_pvp(arg_value):
@@ -79,7 +77,19 @@ def set_pvp(arg_value):
                 'pvp='+arg_value
             )
         else:
-            print('Invalid value for pvp')
+            print('[ERROR] Invalid value for pvp')
+
+def set_whitelist(arg_value):
+    """ Configure the value of the attribute "whitelist" in the file server.properties. """
+    if arg_value:
+        if (arg_value == 'true') or (arg_value == 'false'):
+            search_and_replace(
+                __server_properties_file__,
+                r'white-list=.*$',
+                'white-list='+arg_value
+            )
+        else:
+            print('[ERROR] Invalid value for whitelist')
 
 # #######################################################################
 # ############################### eula.txt ##############################
@@ -98,7 +108,10 @@ def set_eula(arg_value):
                 "You haven't passed 'true' to the --eula argument,"\
                 "meaning that you haven't agreed to the Minecraft server's EULA."
             )
-        search_and_replace(__eula_file__, r'eula=.*$', 'eula='+arg_value)
+        if (arg_value == 'true') or (arg_value == 'false'):
+            search_and_replace(__eula_file__, r'eula=.*$', 'eula='+arg_value)
+        else:
+            print('[ERROR] Invalid value for eula')
 
 # #######################################################################
 # ########################## script arguments ###########################
@@ -113,17 +126,20 @@ __parser__.add_argument(
     default='normal',
     help='set the difficulty of the server'
 )
-
 __parser__.add_argument(
     '-g', '--gamemode',
     default='survival',
     help='set the gamemode of the server'
 )
-
 __parser__.add_argument(
     '--pvp',
     default='true',
     help='set the pvp option of the server'
+)
+__parser__.add_argument(
+    '--whitelist',
+    default='false',
+    help='set the whitelist option of the server'
 )
 
 __parser__.add_argument(
@@ -140,6 +156,7 @@ __args__ = __parser__.parse_args()
 set_difficulty(__args__.difficulty)
 set_gamemode(__args__.gamemode)
 set_pvp(__args__.pvp)
+set_whitelist(__args__.whitelist)
 
 set_eula(__args__.eula)
 
