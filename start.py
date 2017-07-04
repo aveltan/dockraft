@@ -260,9 +260,10 @@ set_eula(__args__.eula)
 
 def run():
     """ Start the minecraft server. """
+    ## TODO add an argument to change the allocated memory 
     process = Popen(
         [
-            "java", "-Xmx512M", "-Xms512M", "-jar",
+            "java", "-Xmx1024M", "-Xms1024M", "-jar",
             "minecraft-server.jar",
             "nogui"
         ],
