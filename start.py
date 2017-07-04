@@ -22,7 +22,7 @@ def search_and_replace(file_path, regex, new_line):
         for line in file:
             print(re.sub(regex, new_line, line), end='')
 
-def add_player(arg_file, arg_player):
+def add_player(arg_file, arg_player, ops):
     """
     Append a player to an array of a json file,
     the player is composed of the uuid and the name separated by a :
@@ -30,11 +30,14 @@ def add_player(arg_file, arg_player):
     file = open(arg_file, 'r+')
     player_list = json.load(file)
     split = re.split(':', arg_player)
-    player = json.loads('{ "uuid" : "'+split[0]+'", "name" : "'+split[1]+'"}')
+    if ops:
+        player = json.loads('{ "uuid":"'+split[0]+'","name":"'+split[1]+'","level":"'+split[2]+'"}')
+    else:
+        player = json.loads('{ "uuid" : "'+split[0]+'", "name" : "'+split[1]+'"}')
     player_list.append(player)
     file.seek(0) ## put the pointer at the beginning to overwrite
     file.write(json.dumps(player_list))
-    file.close()    
+    file.close()
 
 # #######################################################################
 # ######################### server.properties ###########################
@@ -147,7 +150,7 @@ def add_player_ops(arg_value):
     """ Add a player to the whitelist, the uuid and the name are to be specified """
     ## TODO check arg_value is valid
     if arg_value:
-        add_player(__ops_file__, arg_value)
+        add_player(__ops_file__, arg_value, True)
 
 # #######################################################################
 # ########################### whitelist.json ############################
@@ -157,7 +160,7 @@ def add_player_whitelist(arg_value):
     """ Add a player to the whitelist, the uuid and the name are to be specified """
     ## TODO check arg_value is valid
     if arg_value:
-        add_player(__whitelist_file__, arg_value)
+        add_player(__whitelist_file__, arg_value, False)
 
 # #######################################################################
 # ############################### eula.txt ##############################
@@ -222,11 +225,11 @@ __parser__.add_argument(
 
 __parser__.add_argument(
     '-o', '--ops',
-    help='add a player to the ops.json file'
+    help='add a player to the ops.json file, using the format [UUID]:[NAME]:[LEVEL]'
 )
 __parser__.add_argument(
     '-w', '-p', '--player',
-    help='add a player to the whitelist.json file'
+    help='add a player to the whitelist.json file, , using the format [UUID]:[NAME]'
 )
 
 __parser__.add_argument(
@@ -260,12 +263,15 @@ def run():
     process = Popen(
         [
             "java", "-Xmx512M", "-Xms512M", "-jar",
-            __workdir__ +"/minecraft-server/minecraft-server.jar",
+            "minecraft-server.jar",
             "nogui"
         ],
+        cwd=__workdir__ +"/minecraft-server/",
         stdout=PIPE,
         stderr=STDOUT
     )
 
     for log in process.stdout:
         print(log)
+
+run()
