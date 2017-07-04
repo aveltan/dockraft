@@ -261,6 +261,7 @@ set_eula(__args__.eula)
 def run():
     """ Start the minecraft server. """
     ## TODO add an argument to change the allocated memory 
+    ## TODO download the jar instead of storing it
     process = Popen(
         [
             "java", "-Xmx1024M", "-Xms1024M", "-jar",
