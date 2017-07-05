@@ -12,6 +12,8 @@ COPY start.sh ${minecraft_home}/
 VOLUME ${minecraft_home}/world
 VOLUME ${minecraft_home}/logs
 
+EXPOSE 25565
+
 WORKDIR ${minecraft_home}
 
 ## use ENTRYPOINT to CMD, to read the script flag
