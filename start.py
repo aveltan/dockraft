@@ -257,14 +257,14 @@ __parser__.add_argument(
 )
 
 __parser__.add_argument(
-    '--minram',
+    '--minmem',
     action='store',
     default='1024',
     help='define the memory allocated to the server at startup'
 )
 
 __parser__.add_argument(
-    '--maxram',
+    '--maxmem',
     action='store',
     default='1024',
     help='define the memory allocated to the server at startup'
@@ -338,4 +338,4 @@ def run(min_ram, max_ram):
     for log in process.stdout:
         print(log)
 
-run(__args__.minram, __args__.maxram)
+run(__args__.minmem, __args__.maxmem)

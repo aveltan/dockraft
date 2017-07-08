@@ -1,8 +1,8 @@
-## Supported tags and respective ``` Dockerfile ``` links  
+#### Supported tags and respective ``` Dockerfile ``` links  
 
  - ``` latest ``` [(Dockerfile)][DockerfileLatest]
 
-## Quick references
+#### Quick references
 
 - **Where to get help:**  
 [the Docker Community Forums](https://forums.docker.com/), [the Docker Community 
@@ -19,8 +19,7 @@ Slack](https://blog.docker.com/2016/11/introducing-docker-community-directory-do
 
 # Dockraft
 
-Launch a Minecraft server in a docker container. You can pass argument to the ``` docker run ``` command to configure the server before start. The available arguments 
-are specified in the section below.
+Launch a Minecraft server in a docker container. You can pass argument to the ``` docker run ``` command to configure the server before start. The available arguments are specified in the section below.
 
 ## How to use this image
 
@@ -31,12 +30,13 @@ $ docker run -P  aveltan/dockraft --eula=true
 ```
 The ```-P``` option exposes the default port of the container, which is the port ```25565```.
 
-By by passing the argument ```--eula``` the setting below to ```true```, you are indicating your agreement to Mojang's EULA (https://account.mojang.com/documents/minecraft_eula).
+By by passing the argument ```--eula``` the setting below to ```true```, you are indicating your agreement to Mojang's EULA (https://account.mojang.com/documents/minecraft_eula).  
+
+You need an internet connection to create a new container, because it will download the ```.jar``` file on the official [Minecraft website][MinecraftDownloadServerSection].
 
 ### Useful Docker arguments
 
-The ```-p``` options exposes a specific container port and you can redirect to a host port to make it accessible from outside. It takes the format 
-```<host_port>:<container_port>```. It gives you the possibility to run multiple servers using different ports on the host.
+The ```-p``` options exposes a specific container port and you can redirect to a host port to make it accessible from outside. It takes the format ```<host_port>:<container_port>```. It gives you the possibility to run multiple servers using different ports on the host.
 
 The ```--name``` option changes the name of the container, making it easier to find it later.  
 
@@ -45,17 +45,17 @@ The ```-d``` option runs the container in the background. As you cannot see the 
 ### Script arguments
 
 You can find help by passing ```-h``` or ```--help``` to the script.
+
 #### EULA
 
-The ```--eula``` argument changes the value of the ```eula``` field in the ```eula.txt``` file. It means that you agree to the Mojang's [EULA]. You can pass ```true``` or 
-```false```.
+The ```--eula``` argument changes the value of the ```eula``` field in the ```eula.txt``` file. It means that you agree to the Mojang's [EULA]. You can pass ```true``` or ```false```.
 
 #### Server properties
-The following arguments change the values in the ```server.properties``` file. For more informations you can check the official Minecrat wiki about 
-[server.properties][MinecraftWikiServerProperties].
+
+The following arguments change the values in the ```server.properties``` file. For more informations you can check the official Minecrat wiki about [server.properties][MinecraftWikiServerProperties].
+
 ___
-The ```--whitelist``` argument indicates whether or not you want to activate the white-list. If ```true```, only players registered in the ```whitelist.json``` wiill be able to 
-connect to the server.  
+The ```--whitelist``` argument indicates whether or not you want to activate the white-list. If ```true```, only players registered in the ```whitelist.json``` wiill be able to connect to the server.  
 
 The ```--onlinemode``` argument tells if the server will connect the players using the Minecraft's account database, if ```true```.
 
@@ -66,17 +66,19 @@ The ```-g``` or ```--gamemode``` arguments change the gamemode of the server, yo
 The ```-d```, ```--difficulty``` arguments change the difficulty of the server, you have the choice between ```peaceful```, ```easy```, ```normal``` or ```hard```.
 
 #### White-list
-The ```-w```, ```-p```, ```--player``` argument adds a new player to the ```whitelist.json``` file, it takes the form ```<uuid>:<name>```. You can determine a player **uuid** using 
-the online tool on [mcuuid.net](https://mcuuid.net).
+The ```-w```, ```-p```, ```--player``` argument adds a new player to the ```whitelist.json``` file, it takes the form ```<uuid>:<name>```. You can determine a player **uuid** using the online tool on [mcuuid.net](https://mcuuid.net).
 
 #### Ops
-The ```-o```, ```--ops``` arguments add a new player to the ```ops.json``` file , it takes the form ```<uuid>:<name>:<permission_level>```. You can determine a player **uuid** using 
-the online tool on [mcuuid.net](https://mcuuid.net).
+The ```-o```, ```--ops``` arguments add a new player to the ```ops.json``` file , it takes the form ```<uuid>:<name>:<permission_level>```. You can determine a player **uuid** using the online tool on [mcuuid.net](https://mcuuid.net).
+
+#### Runtime
+
+The ```--minmem``` and ```--maxmem``` options defines respectively the memory allocated to the server at startup and the maximum memory that can be used. You must not give more memory than you actually have at your disposal, or you will face unexpected errors.
 
 #### Example :
 ``` 
 $ docker run -d --name minecraft-server -p 12345:25565 aveltan/dockraft -w 069a79f4-44e9-4726-a5be-fca90e38aaf5:notch -o 069a79f4-44e9-4726-a5be-fca90e38aaf5:notch:4 
---whitelist=true --pvp=false --onlinemode=true -g survival -d hard --eula=true
+--whitelist=true --pvp=false --onlinemode=true -g survival -d hard --minmem=512M --maxmem=1024M --eula=true
 ```
 
 ## Backing up data
@@ -91,3 +93,4 @@ $ docker run -d --name minecraft-server -p 12345:25565 aveltan/dockraft -w 069a7
 [DockraftIssues]: <https://github.com/aveltan/dockraft/issues>
 [EULA]: <https://account.mojang.com/documents/minecraft_eula>
 [MinecraftWikiServerProperties]: <http://minecraft.gamepedia.com/Server.properties>
+[MinecraftDownloadServerSection]: <https://minecraft.net/fr-fr/download/server>
