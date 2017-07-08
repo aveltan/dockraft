@@ -3,24 +3,29 @@ This script configure the minecraft server's config files, and run the server.
 """
 #!/usr/bin/env python
 from subprocess import Popen, PIPE, STDOUT
-import os
-import argparse
+from urllib.request import urlretrieve
 import fileinput
-import re
+import argparse
 import json
+import sys
+import os
+import re
 
-## path to this script
+# path to this script
 __workdir__ = os.path.dirname(os.path.realpath(__file__))
 __eula_file__ = __workdir__ + '/minecraft-server/eula.txt'
 __server_properties_file__ = __workdir__ + '/minecraft-server/server.properties'
 __ops_file__ = __workdir__ + '/minecraft-server/ops.json'
 __whitelist_file__ = __workdir__ + '/minecraft-server/whitelist.json'
+__dl_url__ = 'https://s3.amazonaws.com/Minecraft.Download/versions/1.12/minecraft_server.1.12.jar'
+
 
 def search_and_replace(file_path, regex, new_line):
     """ Search for a pattern in the file, and replace with a new line """
     with fileinput.FileInput(file_path, inplace=True) as file:
         for line in file:
             print(re.sub(regex, new_line, line), end='')
+
 
 def add_player(arg_file, arg_player, ops):
     """
@@ -31,17 +36,20 @@ def add_player(arg_file, arg_player, ops):
     player_list = json.load(file)
     split = re.split(':', arg_player)
     if ops:
-        player = json.loads('{ "uuid":"'+split[0]+'","name":"'+split[1]+'","level":"'+split[2]+'"}')
+        player = json.loads(
+            '{ "uuid":"' + split[0] + '","name":"' + split[1] + '","level":"' + split[2] + '"}')
     else:
-        player = json.loads('{ "uuid" : "'+split[0]+'", "name" : "'+split[1]+'"}')
+        player = json.loads(
+            '{ "uuid" : "' + split[0] + '", "name" : "' + split[1] + '"}')
     player_list.append(player)
-    file.seek(0) ## put the pointer at the beginning to overwrite
+    file.seek(0)  # put the pointer at the beginning to overwrite
     file.write(json.dumps(player_list))
     file.close()
 
 # #######################################################################
 # ######################### server.properties ###########################
 # #######################################################################
+
 
 def set_difficulty(arg_value):
     """ Configure the value of the attribute "difficulty" in the file server.properties. """
@@ -62,8 +70,9 @@ def set_difficulty(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'difficulty=.*$',
-                'difficulty='+difficulty_int
+                'difficulty=' + difficulty_int
             )
+
 
 def set_gamemode(arg_value):
     """ Configure the value of the attribute "gamemode" in the file server.properties. """
@@ -84,8 +93,9 @@ def set_gamemode(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'gamemode=.*$',
-                'gamemode='+gamemode_int
+                'gamemode=' + gamemode_int
             )
+
 
 def set_pvp(arg_value):
     """ Configure the value of the attribute "pvp" in the file server.properties. """
@@ -94,10 +104,11 @@ def set_pvp(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'pvp=.*$',
-                'pvp='+arg_value
+                'pvp=' + arg_value
             )
         else:
             print('[ERROR] Invalid value for pvp')
+
 
 def set_whitelist(arg_value):
     """ Configure the value of the attribute "white-list" in the file server.properties. """
@@ -106,14 +117,15 @@ def set_whitelist(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'white-list=.*$',
-                'white-list='+arg_value
+                'white-list=' + arg_value
             )
         else:
             print('[ERROR] Invalid value for whitelist')
 
+
 def set_server_port(arg_value):
     """ Configure the value of the attribute "server-port" in the file server.properties. """
-    ## TODO specify an available range of ports
+    # TODO specify an available range of ports
     if arg_value:
         is_int = False
         try:
@@ -125,10 +137,11 @@ def set_server_port(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'server-port=.*$',
-                'server-port='+arg_value
+                'server-port=' + arg_value
             )
         else:
             print('[ERROR] Invalid value for server port')
+
 
 def set_online_mode(arg_value):
     """ Configure the value of the attribute "online-mode" in the file server.properties. """
@@ -137,7 +150,7 @@ def set_online_mode(arg_value):
             search_and_replace(
                 __server_properties_file__,
                 r'online-mode=.*$',
-                'online-mode='+arg_value
+                'online-mode=' + arg_value
             )
         else:
             print('[ERROR] Invalid value for online mode')
@@ -146,9 +159,10 @@ def set_online_mode(arg_value):
 # ############################### ops.json ##############################
 # #######################################################################
 
+
 def add_player_ops(arg_value):
     """ Add a player to the whitelist, the uuid and the name are to be specified """
-    ## TODO check arg_value is valid
+    # TODO check arg_value is valid
     if arg_value:
         add_player(__ops_file__, arg_value, True)
 
@@ -156,9 +170,10 @@ def add_player_ops(arg_value):
 # ########################### whitelist.json ############################
 # #######################################################################
 
+
 def add_player_whitelist(arg_value):
     """ Add a player to the whitelist, the uuid and the name are to be specified """
-    ## TODO check arg_value is valid
+    # TODO check arg_value is valid
     if arg_value:
         add_player(__whitelist_file__, arg_value, False)
 
@@ -166,27 +181,29 @@ def add_player_whitelist(arg_value):
 # ############################### eula.txt ##############################
 # #######################################################################
 
+
 def set_eula(arg_value):
     """ Configure the value of the attribute "eula" in the file eula.txt. """
     if arg_value:
         if arg_value == 'true':
             print(
-                "By passing 'true' to the --eula argument, "\
+                "By passing 'true' to the --eula argument, "
                 "you're therefore accepting the Minecraft server's EULA."
             )
         else:
             print(
-                "You haven't passed 'true' to the --eula argument,"\
+                "You haven't passed 'true' to the --eula argument,"
                 "meaning that you haven't agreed to the Minecraft server's EULA."
             )
         if (arg_value == 'true') or (arg_value == 'false'):
-            search_and_replace(__eula_file__, r'eula=.*$', 'eula='+arg_value)
+            search_and_replace(__eula_file__, r'eula=.*$', 'eula=' + arg_value)
         else:
             print('[ERROR] Invalid value for eula')
 
 # #######################################################################
 # ########################## script arguments ###########################
 # #######################################################################
+
 
 __parser__ = argparse.ArgumentParser(description='Start a Minecraft server.')
 
@@ -239,7 +256,7 @@ __parser__.add_argument(
     help='by specifying True, the user accepts the Minecraft server\'s EULA.'
 )
 
-# ####################### run the configuration #########################
+# ###################### apply the configuration #######################
 
 __args__ = __parser__.parse_args()
 
@@ -255,20 +272,53 @@ add_player_whitelist(__args__.player)
 set_eula(__args__.eula)
 
 # #######################################################################
+# ###################### download the server ############################
+# #######################################################################
+
+
+def download(arg_url):
+    """ Download the minecraft server """
+    urlretrieve(arg_url, './minecraft-server/minecraft-server.jar', show_progress)
+
+
+def show_progress(blocknum, blocksize, totalsize):
+    """
+    Show the progress of the download.
+    Thanks to J.F. Sebastian on Stack Overflow for snippet.
+    """
+    byte_to_megabyte = 1000000
+    readsofar = blocknum * blocksize
+    if totalsize > 0:
+        percent = readsofar * 1e2 / totalsize
+        display = "\r%5.1f%% %*.2f/%.2fMB" % (
+            percent,
+            len(str(totalsize)),
+            readsofar / byte_to_megabyte,
+            totalsize / byte_to_megabyte
+        )
+        sys.stderr.write(display)
+        if readsofar >= totalsize:  # near the end
+            sys.stderr.write("\n")
+    else:  # total size is unknown
+        sys.stderr.write("read %d\n" % (readsofar,))
+
+download(__dl_url__)
+
+# #######################################################################
 # ########################## run the server #############################
 # #######################################################################
 
 def run():
     """ Start the minecraft server. """
-    ## TODO add an argument to change the allocated memory 
-    ## TODO download the jar instead of storing it
+    # TODO add an argument to change the allocated memory
+    # TODO download the jar instead of storing it
     process = Popen(
         [
             "java", "-Xmx1024M", "-Xms1024M", "-jar",
             "minecraft-server.jar",
             "nogui"
         ],
-        cwd=__workdir__ +"/minecraft-server/",
+        cwd=__workdir__ + "/minecraft-server/",
         stdout=PIPE,
         stderr=STDOUT
     )
