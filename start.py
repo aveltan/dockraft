@@ -1,5 +1,5 @@
 """
-This script configure the minecraft server's config files, and run the server.
+This script configure the minecraft server's config files, download and run the server.
 """
 #!/usr/bin/env python
 from subprocess import Popen, PIPE, STDOUT
@@ -256,6 +256,20 @@ __parser__.add_argument(
     help='by specifying True, the user accepts the Minecraft server\'s EULA.'
 )
 
+__parser__.add_argument(
+    '--minram',
+    action='store',
+    default='1024',
+    help='define the memory allocated to the server at startup'
+)
+
+__parser__.add_argument(
+    '--maxram',
+    action='store',
+    default='1024',
+    help='define the memory allocated to the server at startup'
+)
+
 # ###################### apply the configuration #######################
 
 __args__ = __parser__.parse_args()
@@ -308,13 +322,11 @@ download(__dl_url__)
 # ########################## run the server #############################
 # #######################################################################
 
-def run():
+def run(min_ram, max_ram):
     """ Start the minecraft server. """
-    # TODO add an argument to change the allocated memory
-    # TODO download the jar instead of storing it
     process = Popen(
         [
-            "java", "-Xmx1024M", "-Xms1024M", "-jar",
+            "java", "-Xms"+min_ram, "-Xmx"+max_ram, "-jar",
             "minecraft-server.jar",
             "nogui"
         ],
@@ -326,4 +338,4 @@ def run():
     for log in process.stdout:
         print(log)
 
-run()
+run(__args__.minram, __args__.maxram)
