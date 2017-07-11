@@ -81,9 +81,9 @@ $ docker run -d --name minecraft-server -p 12345:25565 aveltan/dockraft -w 069a7
 --whitelist=true --pvp=false --onlinemode=true -g survival -d hard --minmem=512M --maxmem=1024M --eula=true
 ```
 
-## Backing up data
+### Backing up data
 
-## Image variants
+### Image variants
 
 
 

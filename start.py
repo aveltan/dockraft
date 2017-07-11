@@ -3,9 +3,9 @@ This script configure the minecraft server's config files, download and run the 
 """
 #!/usr/bin/env python
 from subprocess import Popen, PIPE, STDOUT
-from urllib.request import urlretrieve
 import fileinput
 import argparse
+import zipfile
 import json
 import sys
 import os
@@ -17,7 +17,9 @@ __eula_file__ = __workdir__ + '/minecraft-server/eula.txt'
 __server_properties_file__ = __workdir__ + '/minecraft-server/server.properties'
 __ops_file__ = __workdir__ + '/minecraft-server/ops.json'
 __whitelist_file__ = __workdir__ + '/minecraft-server/whitelist.json'
-__dl_url__ = 'https://s3.amazonaws.com/Minecraft.Download/versions/1.12/minecraft_server.1.12.jar'
+__dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439372/download'
+__dl_target__ = './ftb-server.zip'
+__server_directory__ = './minecraft-server'
 
 
 def search_and_replace(file_path, regex, new_line):
@@ -45,6 +47,47 @@ def add_player(arg_file, arg_player, ops):
     file.seek(0)  # put the pointer at the beginning to overwrite
     file.write(json.dumps(player_list))
     file.close()
+
+# #######################################################################
+# ###################### download the server ############################
+# #######################################################################
+
+
+def download(source, target):
+    """ Download the minecraft server """
+    # urlretrieve(arg_url, __dl_target__, show_progress)
+    opener = urllib.request.URLopener()
+    opener.addheader('User-Agent', 'whatever')
+    filename, headers = opener.retrieve(source, target)
+
+def show_progress(blocknum, blocksize, totalsize):
+    """
+    Show the progress of the download.
+    Thanks to J.F. Sebastian on Stack Overflow for the snippet.
+    """
+    byte_to_megabyte = 1000000
+    readsofar = blocknum * blocksize
+    if totalsize > 0:
+        percent = readsofar * 1e2 / totalsize
+        display = "\r%5.1f%% %*.2f/%.2fMB" % (
+            percent,
+            len(str(totalsize)),
+            readsofar / byte_to_megabyte,
+            totalsize / byte_to_megabyte
+        )
+        sys.stderr.write(display)
+        if readsofar >= totalsize:  # near the end
+            sys.stderr.write("\n")
+    else:  # total size is unknown
+        sys.stderr.write("read %d\n" % (readsofar,))
+
+def unzip(source, target):
+    """ Unzip to a target directory """
+    zip_ref = zipfile.ZipFile(source, 'r')
+    zip_ref.extractall(target)
+
+download(__dl_url__, __dl_target__)
+unzip(__dl_target__, __server_directory__)
 
 # #######################################################################
 # ######################### server.properties ###########################
@@ -286,39 +329,6 @@ add_player_whitelist(__args__.player)
 set_eula(__args__.eula)
 
 # #######################################################################
-# ###################### download the server ############################
-# #######################################################################
-
-
-def download(arg_url):
-    """ Download the minecraft server """
-    urlretrieve(arg_url, './minecraft-server/minecraft-server.jar', show_progress)
-
-
-def show_progress(blocknum, blocksize, totalsize):
-    """
-    Show the progress of the download.
-    Thanks to J.F. Sebastian on Stack Overflow for snippet.
-    """
-    byte_to_megabyte = 1000000
-    readsofar = blocknum * blocksize
-    if totalsize > 0:
-        percent = readsofar * 1e2 / totalsize
-        display = "\r%5.1f%% %*.2f/%.2fMB" % (
-            percent,
-            len(str(totalsize)),
-            readsofar / byte_to_megabyte,
-            totalsize / byte_to_megabyte
-        )
-        sys.stderr.write(display)
-        if readsofar >= totalsize:  # near the end
-            sys.stderr.write("\n")
-    else:  # total size is unknown
-        sys.stderr.write("read %d\n" % (readsofar,))
-
-download(__dl_url__)
-
-# #######################################################################
 # ########################## run the server #############################
 # #######################################################################
 
@@ -330,7 +340,7 @@ def run(min_ram, max_ram):
             "minecraft-server.jar",
             "nogui"
         ],
-        cwd=__workdir__ + "/minecraft-server/",
+        cwd=__workdir__ + __server_directory__,
         stdout=PIPE,
         stderr=STDOUT
     )
