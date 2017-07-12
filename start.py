@@ -2,12 +2,14 @@
 This script configure the minecraft server's config files, download and run the server.
 """
 #!/usr/bin/env python3
-from subprocess import Popen, PIPE, STDOUT
+# from subprocess import Popen, PIPE
+import subprocess
 import urllib.request
 import fileinput
 import argparse
 import zipfile
 import json
+import sys
 import os
 import re
 
@@ -15,9 +17,9 @@ import re
 __workdir__ = os.path.dirname(os.path.realpath(__file__))
 __minecraft_server_dir__ = __workdir__ + '/minecraft-server'
 __eula_file__ = __minecraft_server_dir__ + '/eula.txt'
-__server_properties_file__ = __minecraft_server_dir__ + '/minecraft-server/server.properties'
-__ops_file__ = __minecraft_server_dir__ + '/minecraft-server/ops.json'
-__whitelist_file__ = __minecraft_server_dir__ + '/minecraft-server/whitelist.json'
+__server_properties_file__ = __minecraft_server_dir__ + '/server.properties'
+__ops_file__ = __minecraft_server_dir__ + '/ops.json'
+__whitelist_file__ = __minecraft_server_dir__ + '/whitelist.json'
 __dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439376/download'
 __dl_target__ = __minecraft_server_dir__ + '/ftb-server.zip'
 
@@ -55,6 +57,7 @@ def add_player(arg_file, arg_player, ops):
 
 def download(source, target):
     """ Download the minecraft server """
+    # os.mkdir(__minecraft_server_dir__)
     request = urllib.request.Request(
         source,
         data=None,
@@ -77,9 +80,9 @@ def download(source, target):
         file_size_downloaded += len(buffer)
         output_file.write(buffer)
         status = str(
-            '%.2f'%(file_size_downloaded/file_size*100) + "%  "
+            '%d'%(file_size_downloaded/file_size*100) + "%  "
             + '%.2f'%(file_size_downloaded/1000000) + "/"
-            + '%.2f'%(file_size/1000000) + "MB "
+            + '%d'%(file_size/1000000) + "MB "
         )
         print('{0}\r'.format(status), end=" ", flush=True)
     output_file.close()
@@ -88,10 +91,6 @@ def unzip(source, target):
     """ Unzip to a target directory """
     zip_ref = zipfile.ZipFile(source, 'r')
     zip_ref.extractall(target)
-
-download(__dl_url__, __dl_target__)
-unzip(__dl_target__, __minecraft_server_dir__)
-os.remove(__dl_target__)
 
 # #######################################################################
 # ######################### server.properties ###########################
@@ -317,6 +316,38 @@ __parser__.add_argument(
     help='define the memory allocated to the server at startup'
 )
 
+# #######################################################################
+# ########################## run the server #############################
+# #######################################################################
+
+def run():
+    """ Start the minecraft server. """
+    # process = Popen(
+    #     [
+    #         "sh", "ServerStart.sh"
+    #     ],
+    #     cwd=__minecraft_server_dir__,
+    #     stdout=PIPE,
+    #     stderr=PIPE,
+    #     shell=True
+    # )
+
+    # for log in process.stdout:
+    #     print(log)
+    #     sys.stdout.flush()
+    os.chmod(__minecraft_server_dir__ + '/ServerStart.sh', 0o751)
+    subprocess.call(__minecraft_server_dir__ + '/ServerStart.sh')
+
+# #######################################################################
+# ################################# job #################################
+# #######################################################################
+
+# ######################## download the server ##########################
+
+download(__dl_url__, __dl_target__)
+unzip(__dl_target__, __minecraft_server_dir__)
+os.remove(__dl_target__)
+
 # ###################### apply the configuration #######################
 
 __args__ = __parser__.parse_args()
@@ -332,24 +363,6 @@ add_player_whitelist(__args__.player)
 
 set_eula(__args__.eula)
 
-# #######################################################################
-# ########################## run the server #############################
-# #######################################################################
+# ########################### run the server ###########################
 
-def run(min_ram, max_ram):
-    """ Start the minecraft server. """
-    process = Popen(
-        [
-            "java", "-Xms"+min_ram, "-Xmx"+max_ram, "-jar",
-            "minecraft-server.jar",
-            "nogui"
-        ],
-        cwd=__minecraft_server_dir__,
-        stdout=PIPE,
-        stderr=STDOUT
-    )
-
-    for log in process.stdout:
-        print(log)
-
-run(__args__.minmem, __args__.maxmem)
+run()
