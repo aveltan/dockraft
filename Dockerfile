@@ -1,9 +1,9 @@
 FROM java:alpine
-MAINTAINER Eflamm OLLIVIER <eflamm.ollivier@hotmail.fr>
+MAINTAINER aveltan <aveltan@protonmail.com>
 
 ENV minecraft_home=/opt/minecraft
 
-RUN apk update && apk add python3
+RUN apk update && apk add python3 ca-certificates && update-ca-certificates
 
 ## copy the minecraft server files
 COPY minecraft-server/ ${minecraft_home}/minecraft-server
