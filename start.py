@@ -1,25 +1,25 @@
 """
 This script configure the minecraft server's config files, download and run the server.
 """
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from subprocess import Popen, PIPE, STDOUT
+import urllib.request
 import fileinput
 import argparse
 import zipfile
 import json
-import sys
 import os
 import re
 
 # path to this script
 __workdir__ = os.path.dirname(os.path.realpath(__file__))
-__eula_file__ = __workdir__ + '/minecraft-server/eula.txt'
-__server_properties_file__ = __workdir__ + '/minecraft-server/server.properties'
-__ops_file__ = __workdir__ + '/minecraft-server/ops.json'
-__whitelist_file__ = __workdir__ + '/minecraft-server/whitelist.json'
-__dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439372/download'
-__dl_target__ = './ftb-server.zip'
-__server_directory__ = './minecraft-server'
+__minecraft_server_dir__ = __workdir__ + '/minecraft-server'
+__eula_file__ = __minecraft_server_dir__ + '/eula.txt'
+__server_properties_file__ = __minecraft_server_dir__ + '/minecraft-server/server.properties'
+__ops_file__ = __minecraft_server_dir__ + '/minecraft-server/ops.json'
+__whitelist_file__ = __minecraft_server_dir__ + '/minecraft-server/whitelist.json'
+__dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439376/download'
+__dl_target__ = __minecraft_server_dir__ + '/ftb-server.zip'
 
 
 def search_and_replace(file_path, regex, new_line):
@@ -55,31 +55,34 @@ def add_player(arg_file, arg_player, ops):
 
 def download(source, target):
     """ Download the minecraft server """
-    # urlretrieve(arg_url, __dl_target__, show_progress)
-    opener = urllib.request.URLopener()
-    opener.addheader('User-Agent', 'whatever')
-    filename, headers = opener.retrieve(source, target)
+    request = urllib.request.Request(
+        source,
+        data=None,
+        headers={
+            'User-Agent': 'NetRunner'
+        }
+    )
+    output_file = open(target, 'wb')
+    response = urllib.request.urlopen(request)
+    meta = response.info()
+    file_size = int(meta.get_all("Content-Length")[0])
+    print("Downloading: " + '%.2f'%(file_size/1000000) + "MB")
 
-def show_progress(blocknum, blocksize, totalsize):
-    """
-    Show the progress of the download.
-    Thanks to J.F. Sebastian on Stack Overflow for the snippet.
-    """
-    byte_to_megabyte = 1000000
-    readsofar = blocknum * blocksize
-    if totalsize > 0:
-        percent = readsofar * 1e2 / totalsize
-        display = "\r%5.1f%% %*.2f/%.2fMB" % (
-            percent,
-            len(str(totalsize)),
-            readsofar / byte_to_megabyte,
-            totalsize / byte_to_megabyte
+    file_size_downloaded = 0
+    block_size = 8192
+    while True:
+        buffer = response.read(block_size)
+        if not buffer:
+            break
+        file_size_downloaded += len(buffer)
+        output_file.write(buffer)
+        status = str(
+            '%.2f'%(file_size_downloaded/file_size*100) + "%  "
+            + '%.2f'%(file_size_downloaded/1000000) + "/"
+            + '%.2f'%(file_size/1000000) + "MB "
         )
-        sys.stderr.write(display)
-        if readsofar >= totalsize:  # near the end
-            sys.stderr.write("\n")
-    else:  # total size is unknown
-        sys.stderr.write("read %d\n" % (readsofar,))
+        print('{0}\r'.format(status), end=" ", flush=True)
+    output_file.close()
 
 def unzip(source, target):
     """ Unzip to a target directory """
@@ -87,7 +90,8 @@ def unzip(source, target):
     zip_ref.extractall(target)
 
 download(__dl_url__, __dl_target__)
-unzip(__dl_target__, __server_directory__)
+unzip(__dl_target__, __minecraft_server_dir__)
+os.remove(__dl_target__)
 
 # #######################################################################
 # ######################### server.properties ###########################
@@ -340,7 +344,7 @@ def run(min_ram, max_ram):
             "minecraft-server.jar",
             "nogui"
         ],
-        cwd=__workdir__ + __server_directory__,
+        cwd=__minecraft_server_dir__,
         stdout=PIPE,
         stderr=STDOUT
     )
