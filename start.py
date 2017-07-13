@@ -354,8 +354,8 @@ def run():
     # for log in process.stdout:
     #     print(log)
     #     sys.stdout.flush()
-    os.chmod(__minecraft_server_dir__ + '/ServerStart.sh', 0o751)
-    subprocess.call(__minecraft_server_dir__ + '/ServerStart.sh')
+    os.chmod(__server_start___, 0o751)
+    subprocess.call(__server_start___)
 
 # #######################################################################
 # ################################# job #################################
