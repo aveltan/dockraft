@@ -3,7 +3,10 @@ MAINTAINER aveltan <aveltan@protonmail.com>
 
 ENV minecraft_home=/opt/minecraft
 
-RUN apk update && apk add python3 ca-certificates && update-ca-certificates
+RUN apk --no-cache update \
+    && apk --no-cache add python3 ca-certificates wget \
+    && update-ca-certificates \ 
+    && apk --no-cache add openssl
 
 ## copy the minecraft server files
 COPY minecraft-server/ ${minecraft_home}/minecraft-server
