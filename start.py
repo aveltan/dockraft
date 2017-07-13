@@ -20,6 +20,7 @@ __eula_file__ = __minecraft_server_dir__ + '/eula.txt'
 __server_properties_file__ = __minecraft_server_dir__ + '/server.properties'
 __ops_file__ = __minecraft_server_dir__ + '/ops.json'
 __whitelist_file__ = __minecraft_server_dir__ + '/whitelist.json'
+__server_start___ = __minecraft_server_dir__ + '/ServerStart.sh'
 __dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439376/download'
 __dl_target__ = __minecraft_server_dir__ + '/ftb-server.zip'
 
@@ -247,6 +248,24 @@ def set_eula(arg_value):
             print('[ERROR] Invalid value for eula')
 
 # #######################################################################
+# ############################ ServerStart.sh ###########################
+# #######################################################################
+
+## TODO enhance the regex
+def set_min_memory(arg_value):
+    """ Configure the ServerStart.sh script to change the allocated memory at startup"""
+    if arg_value:
+        for line in fileinput.input([__server_start___], inplace=True):
+            print(line.replace('-Xms512M', '-Xmx'+arg_value), end='')
+
+## TODO enhance the regex
+def set_max_memory(arg_value):
+    """ Configure the ServerStart.sh script to change the maximun allocated memory """
+    if arg_value:
+        for line in fileinput.input([__server_start___], inplace=True):
+            print(line.replace('-Xmx2048M', '-Xmx'+arg_value), end='')
+
+# #######################################################################
 # ########################## script arguments ###########################
 # #######################################################################
 
@@ -305,14 +324,14 @@ __parser__.add_argument(
 __parser__.add_argument(
     '--minmem',
     action='store',
-    default='1024',
+    default='512M',
     help='define the memory allocated to the server at startup'
 )
 
 __parser__.add_argument(
     '--maxmem',
     action='store',
-    default='1024',
+    default='2048M',
     help='define the memory allocated to the server at startup'
 )
 
@@ -362,6 +381,9 @@ add_player_ops(__args__.ops)
 add_player_whitelist(__args__.player)
 
 set_eula(__args__.eula)
+
+set_min_memory(__args__.minmem)
+set_max_memory(__args__.maxmem)
 
 # ########################### run the server ###########################
 
