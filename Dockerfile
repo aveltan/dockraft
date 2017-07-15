@@ -13,8 +13,12 @@ COPY minecraft-server/ ${minecraft_home}/minecraft-server
 ## copy the starting script
 COPY start.py ${minecraft_home}/
 
-VOLUME ${minecraft_home}/minecraft-server/world
-VOLUME ${minecraft_home}/minecraft-server/logs
+# maybe it is not a good idea to automatically create a volume at runtime
+# VOLUME ${minecraft_home}/minecraft-server/world/
+# VOLUME ${minecraft_home}/minecraft-server/logs/
+# VOLUME ${minecraft_home}/minecraft-server/ops.json
+# VOLUME ${minecraft_home}/minecraft-server/whitelist.json
+# VOLUME ${minecraft_home}/minecraft-server/server.properties
 
 EXPOSE 25565
 

@@ -9,7 +9,6 @@ import fileinput
 import argparse
 import zipfile
 import json
-import sys
 import os
 import re
 
@@ -275,6 +274,12 @@ __parser__ = argparse.ArgumentParser(description='Start a Minecraft server.')
 # ######################### adding the arguments ########################
 
 __parser__.add_argument(
+    '--run',
+    action='store_true',
+    help='run directly the server without download and configuration'
+)
+
+__parser__.add_argument(
     '-d', '--difficulty',
     default='normal',
     help='set the difficulty of the server'
@@ -341,19 +346,6 @@ __parser__.add_argument(
 
 def run():
     """ Start the minecraft server. """
-    # process = Popen(
-    #     [
-    #         "sh", "ServerStart.sh"
-    #     ],
-    #     cwd=__minecraft_server_dir__,
-    #     stdout=PIPE,
-    #     stderr=PIPE,
-    #     shell=True
-    # )
-
-    # for log in process.stdout:
-    #     print(log)
-    #     sys.stdout.flush()
     os.chmod(__server_start___, 0o751)
     subprocess.call(__server_start___)
 
@@ -361,30 +353,32 @@ def run():
 # ################################# job #################################
 # #######################################################################
 
-# ######################## download the server ##########################
-
-download(__dl_url__, __dl_target__)
-unzip(__dl_target__, __minecraft_server_dir__)
-os.remove(__dl_target__)
-
-# ###################### apply the configuration #######################
-
 __args__ = __parser__.parse_args()
 
-set_difficulty(__args__.difficulty)
-set_gamemode(__args__.gamemode)
-set_pvp(__args__.pvp)
-set_whitelist(__args__.whitelist)
-set_server_port(__args__.port)
-set_online_mode(__args__.onlinemode)
-add_player_ops(__args__.ops)
-add_player_whitelist(__args__.player)
+if not __args__.run:
 
-set_eula(__args__.eula)
+    # ######################## download the server ##########################
+
+    download(__dl_url__, __dl_target__)
+    unzip(__dl_target__, __minecraft_server_dir__)
+    os.remove(__dl_target__)
+
+    # ###################### apply the configuration #######################
+
+    set_difficulty(__args__.difficulty)
+    set_gamemode(__args__.gamemode)
+    set_pvp(__args__.pvp)
+    set_whitelist(__args__.whitelist)
+    set_server_port(__args__.port)
+    set_online_mode(__args__.onlinemode)
+    add_player_ops(__args__.ops)
+    add_player_whitelist(__args__.player)
+
+    set_eula(__args__.eula)
+
+# ########################### run the server ###########################
 
 set_min_memory(__args__.minmem)
 set_max_memory(__args__.maxmem)
-
-# ########################### run the server ###########################
 
 run()
