@@ -20,7 +20,7 @@ __server_properties_file__ = __minecraft_server_dir__ + '/server.properties'
 __ops_file__ = __minecraft_server_dir__ + '/ops.json'
 __whitelist_file__ = __minecraft_server_dir__ + '/whitelist.json'
 __server_start___ = __minecraft_server_dir__ + '/ServerStart.sh'
-__dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2439376/download'
+__dl_url__ = 'https://www.feed-the-beast.com/projects/ftb-infinity-evolved/files/2320896/download'
 __dl_target__ = __minecraft_server_dir__ + '/ftb-server.zip'
 
 
