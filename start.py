@@ -3,6 +3,7 @@ This script configure the minecraft server's config files, download and run the 
 """
 #!/usr/bin/env python3
 # from subprocess import Popen, PIPE
+from pathlib import Path
 import subprocess
 import urllib.request
 import fileinput
@@ -356,25 +357,31 @@ def run():
 __args__ = __parser__.parse_args()
 
 if not __args__.run:
+    
+    # check that the server is not already installed 
+    install_script_path = Path(__server_start___)
+    if not install_script_path.is_file():
 
-    # ######################## download the server ##########################
+        # ######################## download the server ##########################
 
-    download(__dl_url__, __dl_target__)
-    unzip(__dl_target__, __minecraft_server_dir__)
-    os.remove(__dl_target__)
+        download(__dl_url__, __dl_target__)
+        unzip(__dl_target__, __minecraft_server_dir__)
+        os.remove(__dl_target__)
 
-    # ###################### apply the configuration #######################
+        # ###################### apply the configuration #######################
 
-    set_difficulty(__args__.difficulty)
-    set_gamemode(__args__.gamemode)
-    set_pvp(__args__.pvp)
-    set_whitelist(__args__.whitelist)
-    set_server_port(__args__.port)
-    set_online_mode(__args__.onlinemode)
-    add_player_ops(__args__.ops)
-    add_player_whitelist(__args__.player)
+        set_difficulty(__args__.difficulty)
+        set_gamemode(__args__.gamemode)
+        set_pvp(__args__.pvp)
+        set_whitelist(__args__.whitelist)
+        set_server_port(__args__.port)
+        set_online_mode(__args__.onlinemode)
+        add_player_ops(__args__.ops)
+        add_player_whitelist(__args__.player)
 
-    set_eula(__args__.eula)
+        set_eula(__args__.eula)
+    else:
+        print('[INFO] Server already installed') 
 
 # ########################### run the server ###########################
 
